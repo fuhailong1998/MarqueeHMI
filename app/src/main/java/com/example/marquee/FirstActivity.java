@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,11 +12,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 public class FirstActivity extends AppCompatActivity {
 
@@ -61,9 +64,18 @@ public class FirstActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
 
-
+        TextView t1 = findViewById(R.id.textView4);
+        TextView t2 = findViewById(R.id.textView6);
+        TextView t3 = findViewById(R.id.textView5);
+        TextView t4 = findViewById(R.id.textView7);
         Button button1 = findViewById(R.id.button);
-//        button1.setBackgroundColor(0x66544121);
+        Button button2 = findViewById(R.id.button2);
+        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch powerBtn = findViewById(R.id.switch6);
+        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch marqueeBtn = findViewById(R.id.switch1);
+        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led1 = findViewById(R.id.switch2);
+        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led2 = findViewById(R.id.switch3);
+        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led3 = findViewById(R.id.switch4);
+        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led4 = findViewById(R.id.switch5);
 
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,7 +84,6 @@ public class FirstActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        Button button2 = findViewById(R.id.button2);
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -81,8 +92,8 @@ public class FirstActivity extends AppCompatActivity {
             }
         });
 
-        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch power_btn = findViewById(R.id.switch6);
-        power_btn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        powerBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     Toast.makeText(FirstActivity.this,"Power On",Toast.LENGTH_SHORT).show();
@@ -92,8 +103,8 @@ public class FirstActivity extends AppCompatActivity {
             }
         });
 
-        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch marquee_btn = findViewById(R.id.switch1);
-        marquee_btn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        marqueeBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     Toast.makeText(FirstActivity.this,"Marquee On",Toast.LENGTH_SHORT).show();
@@ -104,46 +115,56 @@ public class FirstActivity extends AppCompatActivity {
         });
 
 
-        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led1 = findViewById(R.id.switch2);
+
         led1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     Toast.makeText(FirstActivity.this,"LED1 On",Toast.LENGTH_SHORT).show();
+                    t1.setBackgroundResource(R.drawable.lightup);
                 } else {
                     Toast.makeText(FirstActivity.this,"LED1 Off",Toast.LENGTH_SHORT).show();
+                    t1.setBackgroundResource(R.drawable.light);
+
                 }
             }
         });
 
-        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led2 = findViewById(R.id.switch3);
         led2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     Toast.makeText(FirstActivity.this,"LED2 On",Toast.LENGTH_SHORT).show();
+                    t2.setBackgroundResource(R.drawable.lightup);
                 } else {
                     Toast.makeText(FirstActivity.this,"LED2 Off",Toast.LENGTH_SHORT).show();
+                    t2.setBackgroundResource(R.drawable.light);
                 }
             }
         });
 
-        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led3 = findViewById(R.id.switch4);
         led3.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     Toast.makeText(FirstActivity.this,"LED3 On",Toast.LENGTH_SHORT).show();
+                    t3.setBackgroundResource(R.drawable.lightup);
                 } else {
                     Toast.makeText(FirstActivity.this,"LED3 Off",Toast.LENGTH_SHORT).show();
+                    t3.setBackgroundResource(R.drawable.light);
                 }
             }
         });
 
-        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led4 = findViewById(R.id.switch5);
         led4.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     Toast.makeText(FirstActivity.this,"LED4 On",Toast.LENGTH_SHORT).show();
+                    t4.setBackgroundResource(R.drawable.lightup);
                 } else {
                     Toast.makeText(FirstActivity.this,"LED4 Off",Toast.LENGTH_SHORT).show();
+                    t4.setBackgroundResource(R.drawable.light);
                 }
             }
         });

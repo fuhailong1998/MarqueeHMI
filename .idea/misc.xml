@@ -3,6 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/fxkxb/Desktop/Android/app/src/main/res/drawable/light.xml" value="0.505859375" />
+        <entry key="..\:/Users/fxkxb/Desktop/Android/app/src/main/res/drawable/lightUp.xml" value="0.4921875" />
+        <entry key="..\:/Users/fxkxb/Desktop/Android/app/src/main/res/drawable/radius.xml" value="0.505859375" />
+        <entry key="..\:/Users/fxkxb/Desktop/Android/app/src/main/res/layout/activity_second.xml" value="0.451338199513382" />
+        <entry key="..\:/Users/fxkxb/Desktop/Android/app/src/main/res/layout/first_layout.xml" value="0.75" />
+        <entry key="..\:/Users/fxkxb/Desktop/Android/app/src/main/res/layout/title.xml" value="0.451338199513382" />
         <entry key="app/src/main/res/layout/activity_second.xml" value="0.23641304347826086" />
         <entry key="app/src/main/res/layout/first_layout.xml" value="0.5" />
         <entry key="app/src/main/res/layout/title.xml" value="0.2" />

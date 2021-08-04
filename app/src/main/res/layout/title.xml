@@ -28,7 +28,7 @@
         android:fontFamily="sans-serif-condensed"
         android:gravity="center"
         android:padding="5dp"
-        android:text="灯光控制系统"
+        android:text="Lighting Control System"
         android:textColor="#000"
         android:textSize="24sp" />
 
