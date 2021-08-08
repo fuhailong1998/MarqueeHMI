@@ -153,7 +153,7 @@ public class FirstActivity extends AppCompatActivity {
             public void run() {
                 Log.d("TAG", "run: ");
 
-                timerHandler.postDelayed(this, 500);
+                timerHandler.postDelayed(this, 1000);
             }
         };
 
