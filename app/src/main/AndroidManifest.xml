@@ -12,6 +12,7 @@
 
         <activity
             android:name=".SecondActivity"
+            android:launchMode="singleTask"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.example.marquee.ACTION_START" />

@@ -180,19 +180,26 @@ public class FirstActivity extends AppCompatActivity {
                         leds[msg.what].setBackgroundResource(R.drawable.lightred);
                         break;
                     case 1:
-                        Log.d("TAG", "handleMessage: "+msg.what);
+                        Log.d("TAG", "handleMessage: "+msg.arg1);
                         leds[msg.what].setBackgroundResource(R.drawable.lightgreen);
                         break;
                     case 2:
-                        Log.d("TAG", "handleMessage: "+msg.what);
+                        Log.d("TAG", "handleMessage: "+msg.arg1);
                         leds[msg.what].setBackgroundResource(R.drawable.lightblue);
                         break;
                     case 3:
-                        Log.d("TAG", "handleMessage: "+msg.what);
+                        Log.d("TAG", "handleMessage: "+msg.arg1);
                         leds[msg.what].setBackgroundResource(R.drawable.lightup);
+                        scheduleTaskExecutor.schedule(new Runnable() {
+                            @Override
+                            public void run() {
+                                leds[msg.what].setBackgroundResource(R.drawable.light);
+                                Log.d("TAG", "run: ????????????");
+                            }
+                        }, 500, TimeUnit.MICROSECONDS);
                         break;
                     default:
-                        Log.d("TAG", "handleMessage: "+msg.what);
+                        Log.d("TAG", "handleMessage: "+msg.arg1);
 
                         break;
                 }
@@ -278,7 +285,7 @@ public class FirstActivity extends AppCompatActivity {
                                 message.arg1 = seekBar.getProgress();
                                 mHandler.sendMessage(message);
                             }
-                        },0L,TimeUnit.SECONDS);
+                        },0,TimeUnit.SECONDS);
                     }
                 }
             }));
