@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -19,6 +20,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Timer;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -61,47 +64,66 @@ public class FirstActivity extends AppCompatActivity {
     boolean power = false;
     boolean marqueeFlag = false;
 
+
+    public int[] changeLEDStatus(int[] led){
+
+        for (int i = 0; i < 4; i++) {
+            if (led[i]!=-1){
+                led[i]=1-led[i];
+            }
+        }
+        return led;
+
+    }
     // 点灯
 
-    public void light(Boolean[] b, TextView[] t) {
+    public void light(int[] b, TextView[] t) {
 
         for (int i = 0; i < 4; i++) {
             switch (i) {
                 case 0:
-                    if (b[i]) {
+                    if (b[i]==1) {
                         if (power) {
                             t[i].setBackgroundResource(R.drawable.lightred);
                         }
-                    } else {
+                    } else if (b[i]==-1){
+                        break;
+                    }else {
                         t[i].setBackgroundResource(R.drawable.light);
                     }
                     ;
                     break;
                 case 1:
-                    if (b[i]) {
+                    if (b[i]==1) {
                         if (power) {
                             t[i].setBackgroundResource(R.drawable.lightgreen);
                         }
+                    } else if (b[i]==-1){
+                        break;
                     } else {
                         t[i].setBackgroundResource(R.drawable.light);
                     }
                     ;
                     break;
                 case 2:
-                    if (b[i]) {
+                    if (b[i]==1) {
                         if (power) {
                             t[i].setBackgroundResource(R.drawable.lightblue);
                         }
+                    } else if (b[i]==-1){
+                        break;
                     } else {
                         t[i].setBackgroundResource(R.drawable.light);
                     }
                     ;
                     break;
                 case 3:
-                    if (b[i]) {
+                    if (b[i]==1) {
                         if (power) {
                             t[i].setBackgroundResource(R.drawable.lightup);
                         }
+                    } else if (b[i]==-1){
+                        break;
                     } else {
                         t[i].setBackgroundResource(R.drawable.light);
                     }
@@ -115,27 +137,49 @@ public class FirstActivity extends AppCompatActivity {
 
     }
 
+    @SuppressLint("SetTextI18n")
+    public void logText(String s){
+        TextView t = findViewById(R.id.textView10);
+        t.setMovementMethod(ScrollingMovementMethod.getInstance());
+        Date day=new Date();
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        t.append(df.format(day)+" "+s+"\n");
+
+        int line = t.getLineCount();
+        if (line > 14) {
+            int offset = (t.getLineCount()-2) * t.getLineHeight();
+            t.scrollTo(0, offset - t.getHeight() + t.getLineHeight());
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        TextView[] leds = {findViewById(R.id.textView4), findViewById(R.id.textView6), findViewById(R.id.textView5), findViewById(R.id.textView7)};
-        SeekBar[] freqs = {findViewById(R.id.seekBar3), findViewById(R.id.seekBar5), findViewById(R.id.seekBar4), findViewById(R.id.seekBar6), findViewById(R.id.seekBar2)};
-        TextView[] fts = {findViewById(R.id.textView), findViewById(R.id.textView13), findViewById(R.id.textView14), findViewById(R.id.textView16), findViewById(R.id.textView9)};
+        TextView[] leds = {findViewById(R.id.textView4), findViewById(R.id.textView6),
+                findViewById(R.id.textView5), findViewById(R.id.textView7)};
+        SeekBar[] freqs = {findViewById(R.id.seekBar3), findViewById(R.id.seekBar5),
+                findViewById(R.id.seekBar4), findViewById(R.id.seekBar6),
+                findViewById(R.id.seekBar2)};
+        TextView[] fts = {findViewById(R.id.textView), findViewById(R.id.textView13),
+                findViewById(R.id.textView14), findViewById(R.id.textView16),
+                findViewById(R.id.textView9)};
         Button button1 = findViewById(R.id.button);
         Button button2 = findViewById(R.id.button2);
-        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch powerBtn = findViewById(R.id.switch6);
-        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch marqueeBtn = findViewById(R.id.switch1);
+        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch powerBtn
+                = findViewById(R.id.switch6);
+        @SuppressLint("UseSwitchCompatOrMaterialCode") Switch marqueeBtn
+                = findViewById(R.id.switch1);
         @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led1 = findViewById(R.id.switch2);
         @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led2 = findViewById(R.id.switch3);
         @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led3 = findViewById(R.id.switch4);
         @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led4 = findViewById(R.id.switch5);
         Switch[] ss = {led1, led2, led3, led4};
-        Boolean[] ledStatus = {false, false, false, false};
-        Boolean[][] ledMarquee = {
-                {true, false, false, false},
-                {false, true, false, false},
-                {false, false, true, false},
-                {false, false, false, true},
+        int[]ledStatus = {0, 0, 0, 0};
+        int[][] ledMarquee = {
+                {1, 0, 0, 0},
+                {0, 1, 0, 0},
+                {0, 0, 1, 0},
+                {0, 0, 0, 1},
         };
 
         button1.setOnClickListener(new View.OnClickListener() {
@@ -158,11 +202,13 @@ public class FirstActivity extends AppCompatActivity {
                 if (isChecked) {
                     Toast.makeText(FirstActivity.this, "Power On", Toast.LENGTH_SHORT).show();
                     power = true;
+                    logText("Power On");
                     light(ledStatus, leds);
 
                 } else {
                     Toast.makeText(FirstActivity.this, "Power Off", Toast.LENGTH_SHORT).show();
                     power = false;
+                    logText("Power Off");
                     for (int i = 0; i < 4; i++) {
                         leds[i].setBackgroundResource(R.drawable.light);
                     }
@@ -174,33 +220,58 @@ public class FirstActivity extends AppCompatActivity {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
-                switch (msg.what){
+                int ledid = msg.what;
+
+                switch (ledid){
                     case 0:
-                        Log.d("TAG", "handleMessage: "+msg.arg1);
                         leds[msg.what].setBackgroundResource(R.drawable.lightred);
-                        break;
-                    case 1:
-                        Log.d("TAG", "handleMessage: "+msg.arg1);
-                        leds[msg.what].setBackgroundResource(R.drawable.lightgreen);
-                        break;
-                    case 2:
-                        Log.d("TAG", "handleMessage: "+msg.arg1);
-                        leds[msg.what].setBackgroundResource(R.drawable.lightblue);
-                        break;
-                    case 3:
-                        Log.d("TAG", "handleMessage: "+msg.arg1);
-                        leds[msg.what].setBackgroundResource(R.drawable.lightup);
-                        scheduleTaskExecutor.schedule(new Runnable() {
+                        scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
                             @Override
                             public void run() {
-                                leds[msg.what].setBackgroundResource(R.drawable.light);
-                                Log.d("TAG", "run: ????????????");
+                                light(changeLEDStatus(ledStatus),leds);
                             }
-                        }, 500, TimeUnit.MICROSECONDS);
+                        }, 0,msg.arg1, TimeUnit.MILLISECONDS);
                         break;
-                    default:
-                        Log.d("TAG", "handleMessage: "+msg.arg1);
+                    case 1:
+                        leds[msg.what].setBackgroundResource(R.drawable.lightgreen);
+                        scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
+                            @Override
+                            public void run() {
+                                light(changeLEDStatus(ledStatus),leds);
+                            }
+                        }, 0,msg.arg1, TimeUnit.MILLISECONDS);
+                        break;
+                    case 2:
+                        leds[msg.what].setBackgroundResource(R.drawable.lightblue);
+                        scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
+                            @Override
+                            public void run() {
+                                light(changeLEDStatus(ledStatus),leds);
+                            }
+                        }, 0,msg.arg1, TimeUnit.MILLISECONDS);
+                        break;
+                    case 3:
+                        scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.d("TAG", "run: "+leds[3].getBackground().toString());
+                                leds[3].setBackgroundResource(R.drawable.lightup);
+                            }
+                        }, 0,msg.arg1, TimeUnit.MILLISECONDS);
+                        break;
+                    case 4:
+                            final int[] iii = {0};
+                            scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
+                                @Override
+                                public void run() {
+                                    iii[0] = iii[0] +1;
+                                    light(ledMarquee[(iii[0])%4],leds);
+                                    Log.d("TAG", "run: 11111111111111111111111111");
+                                }
+                            }, 0,msg.arg1, TimeUnit.MILLISECONDS);
+                            break;
 
+                    default:
                         break;
                 }
 
@@ -220,19 +291,22 @@ public class FirstActivity extends AppCompatActivity {
                 if (isChecked) {
                     Toast.makeText(FirstActivity.this, "Marquee On", Toast.LENGTH_SHORT).show();
                     marqueeFlag = true;
-                        scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
+                    logText("Marquee is running.");
+                    scheduleTaskExecutor.schedule(
+                    new Runnable() {
                             @Override
                             public void run() {
                                 Message message = new Message();
-                                message.what = 1;
+                                message.what = 4;
+                                message.arg1 = 1000;
                                 mHandler.sendMessage(message);
                             }
-                        }, 0, 500, TimeUnit.MICROSECONDS);
+                        },0,TimeUnit.SECONDS);
 
                 } else {
                     Toast.makeText(FirstActivity.this, "Marquee Off", Toast.LENGTH_SHORT).show();
                     marqueeFlag = false;
-
+                    logText("Marquee stopped.");
                 }
             }
         });
@@ -246,14 +320,18 @@ public class FirstActivity extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
                         Toast.makeText(FirstActivity.this, "LED" + finalI + 1 + " On", Toast.LENGTH_SHORT).show();
-                        ledStatus[finalI] = true;
+                        ledStatus[finalI] = 1;
                         if (power) {
                             light(ledStatus, leds);
+                            logText("LED"+(finalI+1)+" Lighted.");
                         }
                     } else {
                         Toast.makeText(FirstActivity.this, "LED1" + finalI + 1 + " Off", Toast.LENGTH_SHORT).show();
-                        ledStatus[finalI] = false;
+                        ledStatus[finalI] = 0;
                         light(ledStatus, leds);
+                        if (power){
+                            logText("LED"+(finalI+1)+" Went Out.");
+                        }
                     }
                 }
             });
@@ -277,15 +355,42 @@ public class FirstActivity extends AppCompatActivity {
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
                     if (power) {
-                        scheduleTaskExecutor.schedule(new Runnable() {
-                            @Override
-                            public void run() {
-                                Message message = new Message();
-                                message.what = ii;
-                                message.arg1 = seekBar.getProgress();
-                                mHandler.sendMessage(message);
+                        if (ii<4){
+                            logText("LED"+(ii+1)+" is Running at "+seekBar.getProgress());
+                        }else {
+                            if (marqueeFlag){
+                                logText("Marquee is Running at "+seekBar.getProgress());
                             }
-                        },0,TimeUnit.SECONDS);
+                        }
+                        if (seekBar.getProgress()!=0){
+                            if (power){
+                                if (ii<4){
+                                    scheduleTaskExecutor.schedule(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Message message = new Message();
+                                            message.what = ii;
+                                            message.arg1 = seekBar.getProgress();
+                                            mHandler.sendMessage(message);
+                                        }
+                                    },0,TimeUnit.SECONDS);
+                                }else {
+                                    if (marqueeFlag){
+                                        scheduleTaskExecutor.schedule(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Message message = new Message();
+                                                message.what = ii;
+                                                message.arg1 = seekBar.getProgress();
+                                                mHandler.sendMessage(message);
+                                            }
+                                        },0,TimeUnit.SECONDS);
+                                    }
+                                }
+
+                            }
+
+                        }
                     }
                 }
             }));
