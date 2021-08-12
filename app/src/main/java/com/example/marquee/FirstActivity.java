@@ -224,49 +224,68 @@ public class FirstActivity extends AppCompatActivity {
 
                 switch (ledid){
                     case 0:
-                        leds[msg.what].setBackgroundResource(R.drawable.lightred);
+                        final int[] i = {0};
                         scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
                             @Override
                             public void run() {
-                                light(changeLEDStatus(ledStatus),leds);
+                                i[0] = i[0] + 1;
+                                if (i[0]%2==0){
+                                    leds[0].setBackgroundResource(R.drawable.light);
+                                }else {
+                                    leds[0].setBackgroundResource(R.drawable.lightred);
+                                }
                             }
                         }, 0,msg.arg1, TimeUnit.MILLISECONDS);
                         break;
                     case 1:
-                        leds[msg.what].setBackgroundResource(R.drawable.lightgreen);
+                        final int[] ii = {0};
                         scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
                             @Override
                             public void run() {
-                                light(changeLEDStatus(ledStatus),leds);
+                                ii[0] = ii[0] + 1;
+                                if (ii[0]%2==0){
+                                    leds[1].setBackgroundResource(R.drawable.light);
+                                }else {
+                                    leds[1].setBackgroundResource(R.drawable.lightgreen);
+                                }
                             }
                         }, 0,msg.arg1, TimeUnit.MILLISECONDS);
                         break;
                     case 2:
-                        leds[msg.what].setBackgroundResource(R.drawable.lightblue);
+                        final int[] iii = {0};
                         scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
                             @Override
                             public void run() {
-                                light(changeLEDStatus(ledStatus),leds);
+                                iii[0] = iii[0] + 1;
+                                if (iii[0]%2==0){
+                                    leds[2].setBackgroundResource(R.drawable.light);
+                                }else {
+                                    leds[2].setBackgroundResource(R.drawable.lightblue);
+                                }
                             }
                         }, 0,msg.arg1, TimeUnit.MILLISECONDS);
                         break;
                     case 3:
+                        final int[] iiii = {0};
                         scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
                             @Override
                             public void run() {
-                                Log.d("TAG", "run: "+leds[3].getBackground().toString());
-                                leds[3].setBackgroundResource(R.drawable.lightup);
+                                iiii[0] = iiii[0] + 1;
+                                if (iiii[0]%2==0){
+                                    leds[3].setBackgroundResource(R.drawable.light);
+                                }else {
+                                    leds[3].setBackgroundResource(R.drawable.lightup);
+                                }
                             }
                         }, 0,msg.arg1, TimeUnit.MILLISECONDS);
                         break;
                     case 4:
-                            final int[] iii = {0};
+                            final int[] iiiii = {0};
                             scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
                                 @Override
                                 public void run() {
-                                    iii[0] = iii[0] +1;
-                                    light(ledMarquee[(iii[0])%4],leds);
-                                    Log.d("TAG", "run: 11111111111111111111111111");
+                                    light(ledMarquee[(iiiii[0])%4],leds);
+                                    iiiii[0] = iiiii[0] +1;
                                 }
                             }, 0,msg.arg1, TimeUnit.MILLISECONDS);
                             break;
