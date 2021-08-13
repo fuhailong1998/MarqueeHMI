@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class FirstActivity extends AppCompatActivity {
 
+
     private ScheduledExecutorService scheduleTaskExecutor;
     //多线程并行处理定时任务时，Timer运行多个TimeTask时，只要其中之一没有捕获抛出的异常，其它任务便会自动终止运行，使用ScheduledExecutorService则没有这个问题。
     //ScheduledExecutorService,是基于线程池设计的定时任务类,每个调度任务都会分配到线程池中的一个线程去执行,也就是说,任务是并发执行,互不影响。
