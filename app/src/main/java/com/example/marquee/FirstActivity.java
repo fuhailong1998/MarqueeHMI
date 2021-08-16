@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -22,7 +23,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Timer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -65,12 +69,16 @@ public class FirstActivity extends AppCompatActivity {
     boolean power = false;
     boolean marqueeFlag = false;
 
+    public static boolean testClass() {
+        return true;
+    }
 
-    public int[] changeLEDStatus(int[] led){
+
+    public int[] changeLEDStatus(int[] led) {
 
         for (int i = 0; i < 4; i++) {
-            if (led[i]!=-1){
-                led[i]=1-led[i];
+            if (led[i] != -1) {
+                led[i] = 1 - led[i];
             }
         }
         return led;
@@ -83,23 +91,23 @@ public class FirstActivity extends AppCompatActivity {
         for (int i = 0; i < 4; i++) {
             switch (i) {
                 case 0:
-                    if (b[i]==1) {
+                    if (b[i] == 1) {
                         if (power) {
                             t[i].setBackgroundResource(R.drawable.lightred);
                         }
-                    } else if (b[i]==-1){
+                    } else if (b[i] == -1) {
                         break;
-                    }else {
+                    } else {
                         t[i].setBackgroundResource(R.drawable.light);
                     }
                     ;
                     break;
                 case 1:
-                    if (b[i]==1) {
+                    if (b[i] == 1) {
                         if (power) {
                             t[i].setBackgroundResource(R.drawable.lightgreen);
                         }
-                    } else if (b[i]==-1){
+                    } else if (b[i] == -1) {
                         break;
                     } else {
                         t[i].setBackgroundResource(R.drawable.light);
@@ -107,11 +115,11 @@ public class FirstActivity extends AppCompatActivity {
                     ;
                     break;
                 case 2:
-                    if (b[i]==1) {
+                    if (b[i] == 1) {
                         if (power) {
                             t[i].setBackgroundResource(R.drawable.lightblue);
                         }
-                    } else if (b[i]==-1){
+                    } else if (b[i] == -1) {
                         break;
                     } else {
                         t[i].setBackgroundResource(R.drawable.light);
@@ -119,11 +127,11 @@ public class FirstActivity extends AppCompatActivity {
                     ;
                     break;
                 case 3:
-                    if (b[i]==1) {
+                    if (b[i] == 1) {
                         if (power) {
                             t[i].setBackgroundResource(R.drawable.lightup);
                         }
-                    } else if (b[i]==-1){
+                    } else if (b[i] == -1) {
                         break;
                     } else {
                         t[i].setBackgroundResource(R.drawable.light);
@@ -139,16 +147,16 @@ public class FirstActivity extends AppCompatActivity {
     }
 
     @SuppressLint("SetTextI18n")
-    public void logText(String s){
+    public void logText(String s) {
         TextView t = findViewById(R.id.textView10);
         t.setMovementMethod(ScrollingMovementMethod.getInstance());
-        Date day=new Date();
+        Date day = new Date();
         @SuppressLint("SimpleDateFormat") SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        t.append(df.format(day)+" "+s+"\n");
+        t.append(df.format(day) + " " + s + "\n");
 
         int line = t.getLineCount();
         if (line > 14) {
-            int offset = (t.getLineCount()-2) * t.getLineHeight();
+            int offset = (t.getLineCount() - 2) * t.getLineHeight();
             t.scrollTo(0, offset - t.getHeight() + t.getLineHeight());
         }
     }
@@ -175,7 +183,7 @@ public class FirstActivity extends AppCompatActivity {
         @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led3 = findViewById(R.id.switch4);
         @SuppressLint("UseSwitchCompatOrMaterialCode") Switch led4 = findViewById(R.id.switch5);
         Switch[] ss = {led1, led2, led3, led4};
-        int[]ledStatus = {0, 0, 0, 0};
+        int[] ledStatus = {0, 0, 0, 0};
         int[][] ledMarquee = {
                 {1, 0, 0, 0},
                 {0, 1, 0, 0},
@@ -217,26 +225,36 @@ public class FirstActivity extends AppCompatActivity {
             }
         });
 
+//        scheduleTaskExecutor = Executors.newScheduledThreadPool(5);
+//        Inspection '线程池不允许使用Executors去创建，而是通过ThreadPoolExecutor的方式，这样的处理方式让写的同学更加明确线程池的运行规则，规避资源耗尽的风险。' options
+
+        scheduleTaskExecutor = new ScheduledThreadPoolExecutor(5, new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                return new Thread(r);
+            }
+        });
+
         @SuppressLint("HandlerLeak") Handler mHandler = new Handler() {
             @Override
             public void handleMessage(@NonNull Message msg) {
                 super.handleMessage(msg);
                 int ledid = msg.what;
 
-                switch (ledid){
+                switch (ledid) {
                     case 0:
                         final int[] i = {0};
                         scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
                             @Override
                             public void run() {
                                 i[0] = i[0] + 1;
-                                if (i[0]%2==0){
+                                if (i[0] % 2 == 0) {
                                     leds[0].setBackgroundResource(R.drawable.light);
-                                }else {
+                                } else {
                                     leds[0].setBackgroundResource(R.drawable.lightred);
                                 }
                             }
-                        }, 0,msg.arg1, TimeUnit.MILLISECONDS);
+                        }, 0, msg.arg1, TimeUnit.MILLISECONDS);
                         break;
                     case 1:
                         final int[] ii = {0};
@@ -244,13 +262,13 @@ public class FirstActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 ii[0] = ii[0] + 1;
-                                if (ii[0]%2==0){
+                                if (ii[0] % 2 == 0) {
                                     leds[1].setBackgroundResource(R.drawable.light);
-                                }else {
+                                } else {
                                     leds[1].setBackgroundResource(R.drawable.lightgreen);
                                 }
                             }
-                        }, 0,msg.arg1, TimeUnit.MILLISECONDS);
+                        }, 0, msg.arg1, TimeUnit.MILLISECONDS);
                         break;
                     case 2:
                         final int[] iii = {0};
@@ -258,13 +276,13 @@ public class FirstActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 iii[0] = iii[0] + 1;
-                                if (iii[0]%2==0){
+                                if (iii[0] % 2 == 0) {
                                     leds[2].setBackgroundResource(R.drawable.light);
-                                }else {
+                                } else {
                                     leds[2].setBackgroundResource(R.drawable.lightblue);
                                 }
                             }
-                        }, 0,msg.arg1, TimeUnit.MILLISECONDS);
+                        }, 0, msg.arg1, TimeUnit.MILLISECONDS);
                         break;
                     case 3:
                         final int[] iiii = {0};
@@ -272,24 +290,30 @@ public class FirstActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 iiii[0] = iiii[0] + 1;
-                                if (iiii[0]%2==0){
+                                if (iiii[0] % 2 == 0) {
                                     leds[3].setBackgroundResource(R.drawable.light);
-                                }else {
+                                } else {
                                     leds[3].setBackgroundResource(R.drawable.lightup);
                                 }
                             }
-                        }, 0,msg.arg1, TimeUnit.MILLISECONDS);
+                        }, 0, msg.arg1, TimeUnit.MILLISECONDS);
                         break;
                     case 4:
-                            final int[] iiiii = {0};
-                            scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
-                                @Override
-                                public void run() {
-                                    light(ledMarquee[(iiiii[0])%4],leds);
-                                    iiiii[0] = iiiii[0] +1;
-                                }
-                            }, 0,msg.arg1, TimeUnit.MILLISECONDS);
-                            break;
+
+                        final int[] iiiii = {0};
+
+                        Runnable runnable1 = () -> {
+                            boolean flag = true;
+                            light(ledMarquee[(iiiii[0]) % 4], leds);
+                            iiiii[0] = iiiii[0] + 1;
+
+                        };
+
+                        scheduleTaskExecutor.scheduleAtFixedRate(runnable1, 0, msg.arg1, TimeUnit.MILLISECONDS);
+
+
+
+                        break;
 
                     default:
                         break;
@@ -298,12 +322,7 @@ public class FirstActivity extends AppCompatActivity {
 
             }
         };
-        scheduleTaskExecutor = new ScheduledThreadPoolExecutor(5, new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                return new Thread(r);
-            }
-        });
+
 
         marqueeBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -312,16 +331,10 @@ public class FirstActivity extends AppCompatActivity {
                     Toast.makeText(FirstActivity.this, "Marquee On", Toast.LENGTH_SHORT).show();
                     marqueeFlag = true;
                     logText("Marquee is running.");
-                    scheduleTaskExecutor.schedule(
-                    new Runnable() {
-                            @Override
-                            public void run() {
-                                Message message = new Message();
-                                message.what = 4;
-                                message.arg1 = 1000;
-                                mHandler.sendMessage(message);
-                            }
-                        },0,TimeUnit.SECONDS);
+                    Message message = new Message();
+                    message.what = 4;
+                    message.arg1 = 1000;
+                    mHandler.sendMessage(message);
 
                 } else {
                     Toast.makeText(FirstActivity.this, "Marquee Off", Toast.LENGTH_SHORT).show();
@@ -343,14 +356,14 @@ public class FirstActivity extends AppCompatActivity {
                         ledStatus[finalI] = 1;
                         if (power) {
                             light(ledStatus, leds);
-                            logText("LED"+(finalI+1)+" Lighted.");
+                            logText("LED" + (finalI + 1) + " Lighted.");
                         }
                     } else {
                         Toast.makeText(FirstActivity.this, "LED1" + finalI + 1 + " Off", Toast.LENGTH_SHORT).show();
                         ledStatus[finalI] = 0;
                         light(ledStatus, leds);
-                        if (power){
-                            logText("LED"+(finalI+1)+" Went Out.");
+                        if (power) {
+                            logText("LED" + (finalI + 1) + " Went Out.");
                         }
                     }
                 }
@@ -375,36 +388,26 @@ public class FirstActivity extends AppCompatActivity {
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
                     if (power) {
-                        if (ii<4){
-                            logText("LED"+(ii+1)+" is Running at "+seekBar.getProgress());
-                        }else {
-                            if (marqueeFlag){
-                                logText("Marquee is Running at "+seekBar.getProgress());
+                        if (ii < 4) {
+                            logText("LED" + (ii + 1) + " is Running at " + seekBar.getProgress());
+                        } else {
+                            if (marqueeFlag) {
+                                logText("Marquee is Running at " + seekBar.getProgress());
                             }
                         }
-                        if (seekBar.getProgress()!=0){
-                            if (power){
-                                if (ii<4){
-                                    scheduleTaskExecutor.schedule(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Message message = new Message();
-                                            message.what = ii;
-                                            message.arg1 = seekBar.getProgress();
-                                            mHandler.sendMessage(message);
-                                        }
-                                    },0,TimeUnit.SECONDS);
-                                }else {
-                                    if (marqueeFlag){
-                                        scheduleTaskExecutor.schedule(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                Message message = new Message();
-                                                message.what = ii;
-                                                message.arg1 = seekBar.getProgress();
-                                                mHandler.sendMessage(message);
-                                            }
-                                        },0,TimeUnit.SECONDS);
+                        if (seekBar.getProgress() != 0) {
+                            if (power) {
+                                if (ii < 4) {
+                                    Message message = new Message();
+                                    message.what = ii;
+                                    message.arg1 = seekBar.getProgress();
+                                    mHandler.sendMessage(message);
+                                } else {
+                                    if (marqueeFlag) {
+                                        Message message = new Message();
+                                        message.what = ii;
+                                        message.arg1 = seekBar.getProgress();
+                                        mHandler.sendMessage(message);
                                     }
                                 }
 
