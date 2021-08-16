@@ -20,4 +20,26 @@
         android:id="@+id/include"
         layout="@layout/second_title" />
 
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottom_nav_view" />
+
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_nav_view"
+        android:layout_width="946dp"
+        android:layout_height="55dp"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.506"
+        app:layout_constraintStart_toStartOf="parent"
+        app:itemTextColor="@drawable/selected_menu_colors"
+        android:background="#fcfcfc"
+        app:menu="@menu/tab_menu"
+        />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
