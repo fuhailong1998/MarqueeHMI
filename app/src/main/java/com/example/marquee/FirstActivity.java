@@ -1,14 +1,20 @@
 package com.example.marquee;
 
+import static android.view.View.VISIBLE;
+
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -21,24 +27,23 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+
+import com.example.marqueeservice.LedStatus;
+import com.example.marqueeservice.LedStatusService;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Timer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author leon
  */
 public class FirstActivity extends AppCompatActivity {
-
-
+    private LedStatusService ledStatusService;
+    ServiceConnection connection;
     private ScheduledExecutorService scheduleTaskExecutor;
     //多线程并行处理定时任务时，Timer运行多个TimeTask时，只要其中之一没有捕获抛出的异常，其它任务便会自动终止运行，使用ScheduledExecutorService则没有这个问题。
     //ScheduledExecutorService,是基于线程池设计的定时任务类,每个调度任务都会分配到线程池中的一个线程去执行,也就是说,任务是并发执行,互不影响。
@@ -64,10 +69,33 @@ public class FirstActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
 
+
+        connection = new ServiceConnection() {
+
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                ledStatusService = LedStatusService.Stub.asInterface(service);;
+
+                Log.d("TAG", "onServiceConnected: ");
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+            }
+        };
+        Intent intent = new Intent();
+        ComponentName componentName = new ComponentName("com.example.marqueeservice","com.example.marqueeservice.LedService");
+        intent.setComponent(componentName);
+        bindService(intent,connection,BIND_AUTO_CREATE);
+
+//        bindService(new Intent(MainActivity.this, LedService.class), connection, Context.BIND_AUTO_CREATE);
+
     }
 
     boolean power = false;
     boolean marqueeFlag = false;
+
+    private double lastx, lastY;
 
     public static boolean testClass() {
         return true;
@@ -161,6 +189,7 @@ public class FirstActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onResume() {
         super.onResume();
@@ -191,6 +220,84 @@ public class FirstActivity extends AppCompatActivity {
                 {0, 0, 0, 1},
         };
 
+        TextView floatWin = findViewById(R.id.floatWin);
+        TextView wifiBtn = findViewById(R.id.textView11);
+        TextView bltBtn = findViewById(R.id.textView12);
+
+        @SuppressLint({"WrongViewCast", "UseSwitchCompatOrMaterialCode"}) Switch bluetooth = findViewById(R.id.switch8);
+        @SuppressLint({"WrongViewCast", "UseSwitchCompatOrMaterialCode"}) Switch wifi = findViewById(R.id.switch7);
+
+        bluetooth.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                if (isChecked){
+
+                        try {
+                            ledStatusService.changeLedStatus(new LedStatus(1, false));
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+
+
+                    Log.d("TAG", "onCheckedChanged: ");
+                }
+
+            }
+        });
+
+
+
+
+        floatWin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                wifiBtn.setVisibility(VISIBLE);
+                bltBtn.setVisibility(VISIBLE);
+            }
+        });
+
+        floatWin.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+
+                double x = motionEvent.getRawX();
+                double y = motionEvent.getRawY();
+
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        wifiBtn.setVisibility(View.INVISIBLE);
+                        bltBtn.setVisibility(View.INVISIBLE);
+                        lastx = x;
+                        lastY = y;
+                        break;
+                    case MotionEvent.ACTION_UP:
+
+
+                        floatWin.performClick();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        wifiBtn.setVisibility(View.INVISIBLE);
+                        bltBtn.setVisibility(View.INVISIBLE);
+                        double dx = x - lastx;
+                        double dy = y - lastY;
+                        Log.d("TAG", "onTouch: dx==" + dx + ",dy==" + dy);
+
+                        floatWin.setTranslationX((float) (floatWin.getTranslationX() + dx));
+                        floatWin.setTranslationY((float) (floatWin.getTranslationY() + dy));
+                        lastx = x;
+                        lastY = y;
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });
+
+
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -214,10 +321,15 @@ public class FirstActivity extends AppCompatActivity {
                     logText("Power On");
                     light(ledStatus, leds);
 
+
+
+
                 } else {
                     Toast.makeText(FirstActivity.this, "Power Off", Toast.LENGTH_SHORT).show();
                     power = false;
                     logText("Power Off");
+
+
                     for (int i = 0; i < 4; i++) {
                         leds[i].setBackgroundResource(R.drawable.light);
                     }
@@ -310,7 +422,6 @@ public class FirstActivity extends AppCompatActivity {
                         };
 
                         scheduleTaskExecutor.scheduleAtFixedRate(runnable1, 0, msg.arg1, TimeUnit.MILLISECONDS);
-
 
 
                         break;
@@ -419,6 +530,7 @@ public class FirstActivity extends AppCompatActivity {
             }));
         }
     }
+
 
     @Override
     protected void onDestroy() {
