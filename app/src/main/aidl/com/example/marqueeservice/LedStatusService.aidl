@@ -4,7 +4,7 @@ import com.example.marqueeservice.LedStatus;
 // Declare any non-default types here with import statements
 
 interface LedStatusService {
-    void changeLedStatus(in LedStatus ledStatus);
+    void setStatus(int index, boolean status);
     /**
      * Demonstrates some basic types that you can use as parameters
      * and return values in AIDL.
