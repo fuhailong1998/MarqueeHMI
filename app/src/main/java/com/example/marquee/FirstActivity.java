@@ -28,6 +28,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 
+import com.android.dragonboard.service.IDragonBoardService;
 import com.example.marqueeservice.LedStatus;
 import com.example.marqueeservice.LedStatusService;
 
@@ -42,7 +43,7 @@ import java.util.concurrent.TimeUnit;
  * @author leon
  */
 public class FirstActivity extends AppCompatActivity {
-    private LedStatusService ledStatusService;
+    private IDragonBoardService ledStatusService;
     ServiceConnection connection;
     private ScheduledExecutorService scheduleTaskExecutor;
     //多线程并行处理定时任务时，Timer运行多个TimeTask时，只要其中之一没有捕获抛出的异常，其它任务便会自动终止运行，使用ScheduledExecutorService则没有这个问题。
@@ -74,7 +75,7 @@ public class FirstActivity extends AppCompatActivity {
 
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                ledStatusService = LedStatusService.Stub.asInterface(service);;
+                ledStatusService = IDragonBoardService.Stub.asInterface(service);;
 
                 Log.d("TAG", "onServiceConnected: ");
             }
@@ -84,7 +85,7 @@ public class FirstActivity extends AppCompatActivity {
             }
         };
         Intent intent = new Intent();
-        ComponentName componentName = new ComponentName("com.example.marqueeservice","com.example.marqueeservice.LedService");
+        ComponentName componentName = new ComponentName("com.android.dragonboard.service","com.android.dragonboard.service.DragonBoardService");
         intent.setComponent(componentName);
         bindService(intent,connection,BIND_AUTO_CREATE);
 
@@ -234,7 +235,7 @@ public class FirstActivity extends AppCompatActivity {
                 if (isChecked){
 
                         try {
-                            ledStatusService.changeLedStatus(new LedStatus(1, false));
+                            ledStatusService.setStatus(1, false);
                         } catch (RemoteException e) {
                             e.printStackTrace();
                         }
@@ -246,15 +247,21 @@ public class FirstActivity extends AppCompatActivity {
             }
         });
 
-
+        final int[] nd = {0};
 
 
         floatWin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (nd[0] %2==1){
+                    bluetooth.setVisibility(View.INVISIBLE);
+                    wifi.setVisibility(View.INVISIBLE);
+                }else {
+                    bluetooth.setVisibility(View.VISIBLE);
+                    wifi.setVisibility(View.VISIBLE);
+                }
+                nd[0] = nd[0] + 1;
 
-                wifiBtn.setVisibility(VISIBLE);
-                bltBtn.setVisibility(VISIBLE);
             }
         });
 
@@ -268,19 +275,16 @@ public class FirstActivity extends AppCompatActivity {
 
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        wifiBtn.setVisibility(View.INVISIBLE);
-                        bltBtn.setVisibility(View.INVISIBLE);
+                        bluetooth.setVisibility(View.INVISIBLE);
+                        wifi.setVisibility(View.INVISIBLE);
                         lastx = x;
                         lastY = y;
                         break;
                     case MotionEvent.ACTION_UP:
 
-
                         floatWin.performClick();
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        wifiBtn.setVisibility(View.INVISIBLE);
-                        bltBtn.setVisibility(View.INVISIBLE);
                         double dx = x - lastx;
                         double dy = y - lastY;
                         Log.d("TAG", "onTouch: dx==" + dx + ",dy==" + dy);
