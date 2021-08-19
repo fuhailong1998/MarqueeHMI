@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
  * @author leon
  */
 public class FirstActivity extends AppCompatActivity {
-    private IDragonBoardService ledStatusService;
+    private LedStatusService ledStatusService;
     ServiceConnection connection;
     private ScheduledExecutorService scheduleTaskExecutor;
     //多线程并行处理定时任务时，Timer运行多个TimeTask时，只要其中之一没有捕获抛出的异常，其它任务便会自动终止运行，使用ScheduledExecutorService则没有这个问题。
@@ -69,13 +69,12 @@ public class FirstActivity extends AppCompatActivity {
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
-
-
         connection = new ServiceConnection() {
 
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                ledStatusService = IDragonBoardService.Stub.asInterface(service);;
+                ledStatusService = LedStatusService.Stub.asInterface(service);
+                ;
 
                 Log.d("TAG", "onServiceConnected: ");
             }
@@ -85,11 +84,9 @@ public class FirstActivity extends AppCompatActivity {
             }
         };
         Intent intent = new Intent();
-        ComponentName componentName = new ComponentName("com.android.dragonboard.service","com.android.dragonboard.service.DragonBoardService");
+        ComponentName componentName = new ComponentName("com.example.marqueeservice", "com.example.marqueeservice.LedService");
         intent.setComponent(componentName);
-        bindService(intent,connection,BIND_AUTO_CREATE);
-
-//        bindService(new Intent(MainActivity.this, LedService.class), connection, Context.BIND_AUTO_CREATE);
+        bindService(intent, connection, BIND_AUTO_CREATE);
 
     }
 
@@ -102,17 +99,15 @@ public class FirstActivity extends AppCompatActivity {
         return true;
     }
 
-
-    public int[] changeLEDStatus(int[] led) {
-
-        for (int i = 0; i < 4; i++) {
-            if (led[i] != -1) {
-                led[i] = 1 - led[i];
-            }
+    public void sendMess(int i, boolean b) {
+        LedStatus ledStatus = new LedStatus(i, b);
+        try {
+            ledStatusService.changeLedStatus(ledStatus);
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
-        return led;
-
     }
+
     // 点灯
 
     public void light(int[] b, TextView[] t) {
@@ -123,11 +118,13 @@ public class FirstActivity extends AppCompatActivity {
                     if (b[i] == 1) {
                         if (power) {
                             t[i].setBackgroundResource(R.drawable.lightred);
+                            sendMess(0, true);
                         }
                     } else if (b[i] == -1) {
                         break;
                     } else {
                         t[i].setBackgroundResource(R.drawable.light);
+                        sendMess(0, false);
                     }
                     ;
                     break;
@@ -135,11 +132,13 @@ public class FirstActivity extends AppCompatActivity {
                     if (b[i] == 1) {
                         if (power) {
                             t[i].setBackgroundResource(R.drawable.lightgreen);
+                            sendMess(1, true);
                         }
                     } else if (b[i] == -1) {
                         break;
                     } else {
                         t[i].setBackgroundResource(R.drawable.light);
+                        sendMess(1, false);
                     }
                     ;
                     break;
@@ -147,11 +146,13 @@ public class FirstActivity extends AppCompatActivity {
                     if (b[i] == 1) {
                         if (power) {
                             t[i].setBackgroundResource(R.drawable.lightblue);
+                            sendMess(2, true);
                         }
                     } else if (b[i] == -1) {
                         break;
                     } else {
                         t[i].setBackgroundResource(R.drawable.light);
+                        sendMess(2, false);
                     }
                     ;
                     break;
@@ -159,20 +160,20 @@ public class FirstActivity extends AppCompatActivity {
                     if (b[i] == 1) {
                         if (power) {
                             t[i].setBackgroundResource(R.drawable.lightup);
+                            sendMess(3, true);
                         }
                     } else if (b[i] == -1) {
                         break;
                     } else {
                         t[i].setBackgroundResource(R.drawable.light);
+                        sendMess(3, false);
                     }
                     ;
                     break;
                 default:
                     break;
             }
-
         }
-
     }
 
     @SuppressLint("SetTextI18n")
@@ -232,18 +233,6 @@ public class FirstActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                if (isChecked){
-
-                        try {
-                            ledStatusService.setStatus(1, false);
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
-
-
-                    Log.d("TAG", "onCheckedChanged: ");
-                }
-
             }
         });
 
@@ -253,10 +242,10 @@ public class FirstActivity extends AppCompatActivity {
         floatWin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (nd[0] %2==1){
+                if (nd[0] % 2 == 1) {
                     bluetooth.setVisibility(View.INVISIBLE);
                     wifi.setVisibility(View.INVISIBLE);
-                }else {
+                } else {
                     bluetooth.setVisibility(View.VISIBLE);
                     wifi.setVisibility(View.VISIBLE);
                 }
@@ -264,6 +253,7 @@ public class FirstActivity extends AppCompatActivity {
 
             }
         });
+
 
         floatWin.setOnTouchListener(new View.OnTouchListener() {
 
@@ -309,6 +299,7 @@ public class FirstActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -316,6 +307,7 @@ public class FirstActivity extends AppCompatActivity {
                 finish();
             }
         });
+
         powerBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -324,16 +316,10 @@ public class FirstActivity extends AppCompatActivity {
                     power = true;
                     logText("Power On");
                     light(ledStatus, leds);
-
-
-
-
                 } else {
                     Toast.makeText(FirstActivity.this, "Power Off", Toast.LENGTH_SHORT).show();
                     power = false;
                     logText("Power Off");
-
-
                     for (int i = 0; i < 4; i++) {
                         leds[i].setBackgroundResource(R.drawable.light);
                     }
@@ -351,6 +337,7 @@ public class FirstActivity extends AppCompatActivity {
             }
         });
 
+
         @SuppressLint("HandlerLeak") Handler mHandler = new Handler() {
             @Override
             public void handleMessage(@NonNull Message msg) {
@@ -366,8 +353,10 @@ public class FirstActivity extends AppCompatActivity {
                                 i[0] = i[0] + 1;
                                 if (i[0] % 2 == 0) {
                                     leds[0].setBackgroundResource(R.drawable.light);
+                                    sendMess(0, true);
                                 } else {
                                     leds[0].setBackgroundResource(R.drawable.lightred);
+                                    sendMess(0, false);
                                 }
                             }
                         }, 0, msg.arg1, TimeUnit.MILLISECONDS);
@@ -380,8 +369,10 @@ public class FirstActivity extends AppCompatActivity {
                                 ii[0] = ii[0] + 1;
                                 if (ii[0] % 2 == 0) {
                                     leds[1].setBackgroundResource(R.drawable.light);
+                                    sendMess(1, true);
                                 } else {
                                     leds[1].setBackgroundResource(R.drawable.lightgreen);
+                                    sendMess(1, false);
                                 }
                             }
                         }, 0, msg.arg1, TimeUnit.MILLISECONDS);
@@ -394,8 +385,10 @@ public class FirstActivity extends AppCompatActivity {
                                 iii[0] = iii[0] + 1;
                                 if (iii[0] % 2 == 0) {
                                     leds[2].setBackgroundResource(R.drawable.light);
+                                    sendMess(2, true);
                                 } else {
                                     leds[2].setBackgroundResource(R.drawable.lightblue);
+                                    sendMess(2, true);
                                 }
                             }
                         }, 0, msg.arg1, TimeUnit.MILLISECONDS);
@@ -408,8 +401,12 @@ public class FirstActivity extends AppCompatActivity {
                                 iiii[0] = iiii[0] + 1;
                                 if (iiii[0] % 2 == 0) {
                                     leds[3].setBackgroundResource(R.drawable.light);
+                                    sendMess(3, true);
+
                                 } else {
                                     leds[3].setBackgroundResource(R.drawable.lightup);
+                                    sendMess(3, false);
+
                                 }
                             }
                         }, 0, msg.arg1, TimeUnit.MILLISECONDS);
@@ -422,19 +419,12 @@ public class FirstActivity extends AppCompatActivity {
                             boolean flag = true;
                             light(ledMarquee[(iiiii[0]) % 4], leds);
                             iiiii[0] = iiiii[0] + 1;
-
                         };
-
                         scheduleTaskExecutor.scheduleAtFixedRate(runnable1, 0, msg.arg1, TimeUnit.MILLISECONDS);
-
-
                         break;
-
                     default:
                         break;
                 }
-
-
             }
         };
 
@@ -525,9 +515,7 @@ public class FirstActivity extends AppCompatActivity {
                                         mHandler.sendMessage(message);
                                     }
                                 }
-
                             }
-
                         }
                     }
                 }
